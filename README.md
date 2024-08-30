@@ -2,7 +2,7 @@
 
 ## Problema Proposto
 
-O desafio proposto consistia em desenvolver um serviço de back-end para gerenciar a leitura individualizada de consumo de água e gás. O sistema deveria permitir a coleta de dados através de imagens de medidores, utilizando uma API de inteligência artificial (IA) para extrair as medições. O objetivo era criar uma API RESTful que pudesse receber, processar e armazenar essas informações de forma eficiente e segura.
+O desafio  proposto consistia em desenvolver um serviço de back-end para gerenciar a leitura individualizada de consumo de água e gás. O sistema deveria permitir a coleta de dados através de imagens de medidores, utilizando uma API de inteligência artificial (IA) para extrair as medições. O objetivo era criar uma API RESTful que pudesse receber, processar e armazenar essas informações de forma eficiente e segura.
 
 ## Escolha de Tecnologias
 

@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { CustomersModule } from './customer/customer.module';
+import { MeasureModule } from './measure/measure.module';
+import { ReadingModule } from './reading/reading.module';
 
 @Module({
   imports: [
@@ -14,12 +16,13 @@ import { CustomersModule } from './customer/customer.module';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [],
-      synchronize: true,
-      autoLoadEntities: true,
+      autoLoadEntities: true, // Carrega todas as entidades automaticamente
+      synchronize: true, // Sincroniza o banco de dados com as entidades
     }),
     UsersModule,
     CustomersModule,
+    MeasureModule,
+    ReadingModule, // Removida a duplicação
   ],
   controllers: [AppController],
   providers: [AppService],

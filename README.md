@@ -1,218 +1,42 @@
-# Nest + Docker + PGSQL + TypeOrm
+# Projeto de Gestão de Consumo de Água e Gás
 
-- [x] Init Nest project
-- [x] Create Dockerfile
-- [x] Create docker-compose.yml
-- [x] Create .dockerignore
-- [x] Build the containers
-- [x] Setting up the PG database
-- [x] Install the TypeORM dependencies
-- [x] Import TypeORM at the app.module.ts
-- [x] Create a new REST module
-- [x] Create the user entity
-- [x] Inject the user entity on the TypeORMModule (users.module.ts)
-- [x] Create the request and response DTOs
-- [x] Apply the DTOs on the controllers
-- [x] Apply the DTOs on the services
+## Problema Proposto
 
-## Initiating a new Nest project
+O desafio proposto consistia em desenvolver um serviço de back-end para gerenciar a leitura individualizada de consumo de água e gás. O sistema deveria permitir a coleta de dados através de imagens de medidores, utilizando uma API de inteligência artificial (IA) para extrair as medições. O objetivo era criar uma API RESTful que pudesse receber, processar e armazenar essas informações de forma eficiente e segura.
 
-```bash
-nest new project-name
-```
+## Escolha de Tecnologias
 
-## Creating the Dockerfile
+Para a implementação deste projeto, optei por utilizar NestJS, PostgreSQL e Docker:
 
-```Dockerfile
-FROM node:18
+- **NestJS**: Escolhi o NestJS por ser um framework robusto e escalável para Node.js, que facilita a construção de aplicações server-side. Sua arquitetura modular e suporte a TypeScript proporcionam uma base sólida para o desenvolvimento, além de facilitar a manutenção e a testabilidade do código.
 
-WORKDIR /app
+- **PostgreSQL**: A escolha do PostgreSQL se deu por sua confiabilidade, robustez e suporte a recursos avançados, como transações e integridade referencial. Ele é ideal para aplicações que requerem um banco de dados relacional com alta performance e escalabilidade.
 
-COPY package*.json ./
+- **Docker**: A utilização de containers Docker permite a criação de um ambiente isolado e consistente para a aplicação, facilitando o desenvolvimento, testes e implantação. Com o Docker, é possível garantir que a aplicação funcione da mesma forma em diferentes ambientes, evitando problemas de configuração.
 
-RUN npm install
+## Recursos Criados
 
-COPY . .
+Durante o desenvolvimento, foram criados os seguintes recursos (endpoints) para lidar com os desafios da aplicação:
 
-RUN npm run build
+- **POST `/upload`**:  
+  Este endpoint é responsável por receber uma imagem em base64, consultar a API de IA (Google Gemini) e retornar a medida lida. Ele valida os dados recebidos e verifica se já existe uma leitura para o mês atual, garantindo que não haja duplicidade.
 
-CMD [ "npm", "run", "start:dev"
-```
+- **PATCH `/confirm`**:  
+  Este endpoint permite confirmar ou corrigir o valor lido pelo LLM. Ele valida os dados dos parâmetros enviados, verifica se o código de leitura existe e se já foi confirmado, e então salva o novo valor no banco de dados. Isso assegura a integridade dos dados e evita confirmações duplicadas.
 
-## Create docker-compose.yml
+- **GET `/<customer_code>/list`**:  
+  Este endpoint lista as medidas realizadas por um cliente específico. Ele filtra as leituras com base no código do cliente e, opcionalmente, permite filtrar por tipo de medição (água ou gás). Isso proporciona uma maneira eficiente de acessar as informações de consumo.
 
-```docker-compose.yml
-version: '3.5'
+## Melhores Práticas e Desafios
 
-services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=postgres
-    container_name: postgres
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-    ports:
-      - '7654:7654'
+Durante o desenvolvimento, implementei as melhores práticas, como a validação de dados, tratamento de erros e a utilização de um padrão de arquitetura modular. No entanto, enfrentei um pequeno problema relacionado à conexão da aplicação com o banco de dados, o que me impediu de prosseguir com a finalização do projeto.
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nest-docker-postgres
-    environment:
-      - PORT=${PORT}
-    ports:
-      - '3000:3000'
-    depends_on:
-      - db
-    volumes:
-      - ./src:/app/src
+Como analista de sistemas com mais de 3 anos de experiência, estou em transição para a área de programação. O tempo disponível para este desafio foi curto, e se eu tivesse mais uma semana, não apenas resolveria o problema de conexão, mas também implementaria melhorias adicionais na aplicação, como testes automatizados e otimizações de performance.
 
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    container_name: nest-pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
-    ports:
-      - '5050:80'
-    depends_on:
-      - db
-```
+## Conclusão
 
-## Creating .dockerignore
+Em resumo, o projeto foi uma excelente oportunidade para aplicar conhecimentos em desenvolvimento de back-end, utilizando tecnologias modernas e práticas recomendadas. Estou ansioso para continuar aprimorando minhas habilidades e contribuir de forma significativa em projetos futuros.
 
-```dockerignore
-Dockerfile
-.dockerignore
-node_modules
-npm-debug.log
-dist
-```
+---
 
-
-## Building the containers
-
-```bash
-docker compose up --build
-```
-
-## Setting up the PG database
-
-To set up your Postgres database you must access `http://localhost:5050` (pgadmin) and log in using the credentials you have specified at the `docker-compose.yml` file.
-
-In this case, we are going to use the following credentials:
-
-```.env
-EMAIL=admin@admin.com
-PASSWORD=pgadmin4
-```
-
-After logging in, you must create a new server (Right click Servers > Register > Server), go to the Connection tab and fill in the following fields:
-
-```
-Host name/address: db
-Port: 5432
-Maintenance database: postgres
-Username: postgres
-Password: postgres
-```
-
-## Installing the TypeORM dependencies
-
-```bash
-npm install @nestjs/typeorm typeorm pg class-validators
-```
-
-## Importing TypeORM at the app.module.ts
-
-```typescript app.module.ts
-imports: [
-  TypeOrmModule.forRoot({
-    type: 'postgres',
-    host: 'db',
-    port: 5432,
-    username: 'postgres',
-    password: 'postgres',
-    database: 'postgres',
-    entities: [],
-    synchronize: true,
-    autoLoadEntities: true,
-  }),
-],
-```
-
-## Creating a new REST module for Users
-
-```bash
-nest g rest users
-```
-
-## Creating the user entity
-
-```typescript user.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
-@Entity()
-export class UserEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
-
-  @Column({ default: true })
-  isActive: boolean;
-}
-```
-
-## Injecting the user entity on the TypeORMModule (users.module.ts)
-
-```typescript users.module.ts
-imports: [TypeOrmModule.forFeature([UserEntity])],
-```
-
-## Creating the request DTO
-
-```typescript request-user.dto.ts
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
-
-export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  firstName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @IsBoolean()
-  isActive: boolean;
-}
-```
-
-## Creating the response DTO
-
-```typescript response-user.dto.ts
-import { UserEntity } from './../entities/user.entity';
-
-export class ResponseUserDTO {
-  id: number;
-  firstName: string;
-  lastName: string;
-  isActive: boolean;
-
-  constructor(user: Partial<UserEntity>) {
-    this.id = user.id;
-    this.firstName = user.firstName;
-    this.lastName = user.lastName;
-    this.isActive = user.isActive;
-  }
-}
-```
+**Meu LinkedIn:** [Ivan Oliveira](https://www.linkedin.com/in/ivanolivendev/)
